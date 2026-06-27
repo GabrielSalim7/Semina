@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cobertura de Estoque — Semina</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Calibri,Arial,sans-serif;background:#f4f4f8;font-size:12px;color:#222;}
@@ -26,25 +27,25 @@ body{font-family:Calibri,Arial,sans-serif;background:#f4f4f8;font-size:12px;colo
 .toggle-bar{display:flex;align-items:center;gap:12px;padding:8px 20px;background:#fff;border-top:1px solid #E5E7EB;border-bottom:1px solid #E5E7EB;flex-wrap:wrap;}
 .toggle-wrap{display:flex;align-items:center;gap:8px;}
 .toggle-lbl{font-size:11px;color:#374151;font-weight:600;}
-.toggle{position:relative;width:40px;height:22px;}
-.toggle input{opacity:0;width:0;height:0;}
-.slider{position:absolute;cursor:pointer;inset:0;background:#D1D5DB;border-radius:22px;transition:.3s;}
-.slider:before{position:absolute;content:"";height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
-input:checked+.slider{background:#7C3AED;}
-input:checked+.slider:before{transform:translateX(18px);}
-.toggle-hint{font-size:10px;color:#6B7280;}
-.toggle-hint.on{color:#7C3AED;font-weight:600;}
-.sexta-badge{margin-left:auto;background:#EDE8F8;color:#3C3489;border:1px solid #CECBF6;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;}
+.tog{position:relative;width:40px;height:22px;}
+.tog input{opacity:0;width:0;height:0;}
+.slid{position:absolute;cursor:pointer;inset:0;background:#D1D5DB;border-radius:22px;transition:.3s;}
+.slid:before{position:absolute;content:"";height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+input:checked+.slid{background:#7C3AED;}
+input:checked+.slid:before{transform:translateX(18px);}
+.tog-hint{font-size:10px;color:#6B7280;}
+.tog-hint.on{color:#7C3AED;font-weight:600;}
+.sex-badge{margin-left:auto;background:#EDE8F8;color:#3C3489;border:1px solid #CECBF6;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;}
 .filter-bar{display:flex;gap:8px;align-items:center;padding:8px 20px;background:#f9f9fb;border-bottom:1px solid #E5E7EB;flex-wrap:wrap;}
-.filter-label{font-size:10px;color:#6B7280;white-space:nowrap;}
-.search-wrap{position:relative;flex:1;min-width:180px;}
-.search-wrap input{width:100%;padding:6px 10px 6px 28px;border:1px solid #D1D5DB;border-radius:6px;font-size:11px;background:#fff;outline:none;font-family:inherit;}
-.search-wrap input:focus{border-color:#7C3AED;}
-.sico{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:12px;}
+.flbl{font-size:10px;color:#6B7280;white-space:nowrap;}
+.sw{position:relative;flex:1;min-width:180px;}
+.sw input{width:100%;padding:6px 10px 6px 28px;border:1px solid #D1D5DB;border-radius:6px;font-size:11px;background:#fff;outline:none;font-family:inherit;}
+.sw input:focus{border-color:#7C3AED;}
+.sico{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:#9CA3AF;}
 .fsel{padding:6px 10px;border:1px solid #D1D5DB;border-radius:6px;font-size:11px;background:#fff;outline:none;cursor:pointer;color:#374151;min-width:130px;font-family:inherit;}
 .fsel:focus{border-color:#7C3AED;}
-.btn-cl{padding:5px 10px;border:1px solid #D1D5DB;border-radius:6px;font-size:11px;background:#fff;cursor:pointer;color:#6B7280;font-family:inherit;}
-.btn-cl:hover{background:#F3F4F6;}
+.bcl{padding:5px 10px;border:1px solid #D1D5DB;border-radius:6px;font-size:11px;background:#fff;cursor:pointer;color:#6B7280;font-family:inherit;}
+.bcl:hover{background:#F3F4F6;}
 .rinfo{font-size:10px;color:#6B7280;padding:3px 20px 0;}
 .rinfo strong{color:#3C3489;}
 .tw{padding:4px 20px 20px;overflow-x:auto;}
@@ -52,8 +53,9 @@ table{width:100%;border-collapse:collapse;font-size:11px;background:#fff;border-
 thead tr{background:#3A2060;color:#fff;}
 thead th{padding:7px 8px;text-align:left;font-size:10px;font-weight:600;white-space:nowrap;}
 thead th.r{text-align:right;}
-thead th.esp{background:#2D1A50;color:#C4B5FD;}
-thead th.esg{background:#1A3A2A;color:#6EE7B7;}
+thead th.th-esp{background:#2D1A50;color:#C4B5FD;text-align:right;}
+thead th.th-esg{background:#1A3A2A;color:#6EE7B7;text-align:right;}
+thead th.th-totc{background:#2D1A50;color:#C4B5FD;text-align:right;}
 tbody tr:nth-child(even){background:#FAFAFA;}
 tbody tr:hover{background:#EEEDFE;}
 tbody td{padding:5px 8px;vertical-align:middle;border-bottom:1px solid #F0EDF8;white-space:nowrap;}
@@ -63,20 +65,15 @@ tbody td.cod{font-size:10px;color:#6B7280;font-family:monospace;}
 .fp{color:#3B6D11;font-size:10px;font-weight:600;}
 .ft{color:#185FA5;font-size:10px;font-weight:600;}
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;}
-.bsb{background:#FCEBEB;color:#A32D2D;}
-.bsi{background:#FAEEDA;color:#854F0B;}
-.bsa{background:#EEEDFE;color:#3C3489;}
-.ccb{color:#A32D2D;font-weight:700;}
-.cci{color:#854F0B;font-weight:700;}
-.cca{color:#3C3489;font-weight:700;}
+.bsb{background:#FCEBEB;color:#A32D2D;}.bsi{background:#FAEEDA;color:#854F0B;}.bsa{background:#EEEDFE;color:#3C3489;}
+.ccb{color:#A32D2D;font-weight:700;}.cci{color:#854F0B;font-weight:700;}.cca{color:#3C3489;font-weight:700;}
 .sec td{background:#F3F0FA;font-size:9px;font-weight:700;color:#3C3489;letter-spacing:.4px;text-transform:uppercase;padding:4px 8px;border-top:2px solid #CECBF6;}
-.ent-sp{color:#7C3AED;font-weight:700;}
-.ent-es{color:#059669;font-weight:700;}
-.tot-c{color:#7C3AED;font-weight:700;}
+.ent-sp{color:#7C3AED;font-weight:700;}.ent-es{color:#059669;font-weight:700;}.tot-c{color:#7C3AED;font-weight:700;}
 mark{background:#FEF9C3;border-radius:2px;padding:0 1px;}
 .empty{text-align:center;padding:40px;color:#9CA3AF;font-size:13px;}
+.loading{padding:40px 20px;color:#9CA3AF;text-align:center;}
 .error-box{margin:20px;padding:16px 20px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;color:#991B1B;font-size:13px;line-height:1.6;}
-.error-box code{background:#FEE2E2;padding:2px 6px;border-radius:4px;font-size:12px;}
+.error-box code{background:#FEE2E2;padding:2px 6px;border-radius:4px;}
 </style>
 </head>
 <body>
@@ -100,287 +97,240 @@ mark{background:#FEF9C3;border-radius:2px;padding:0 1px;}
 
 <div class="toggle-bar">
   <div class="toggle-wrap">
-    <label class="toggle">
-      <input type="checkbox" id="toggleEntrada" onchange="applyFilters()">
-      <span class="slider"></span>
+    <label class="tog">
+      <input type="checkbox" id="togEnt" onchange="render()">
+      <span class="slid"></span>
     </label>
     <span class="toggle-lbl">Considerar entrada prevista</span>
   </div>
-  <span class="toggle-hint" id="toggleHint">Exibindo apenas estoque atual</span>
-  <div class="sexta-badge" id="sextaBadge"></div>
+  <span class="tog-hint" id="togHint">Exibindo apenas estoque atual</span>
+  <div class="sex-badge" id="sextaBadge"></div>
 </div>
 
 <div class="filter-bar">
-  <span class="filter-label">Filtrar:</span>
-  <div class="search-wrap">
-    <span class="sico">&#128269;</span>
-    <input type="text" id="q" placeholder="Pesquisar código, SKU, descrição..." oninput="applyFilters()">
+  <span class="flbl">Filtrar:</span>
+  <div class="sw">
+    <span class="sico">🔍</span>
+    <input type="text" id="q" placeholder="Pesquisar código, SKU, descrição..." oninput="render()">
   </div>
-  <select class="fsel" id="fFab" onchange="applyFilters()">
+  <select class="fsel" id="fFab" onchange="render()">
     <option value="">Fabricação — todas</option>
     <option value="Própria">Própria</option>
     <option value="Terceiros">Terceiros</option>
   </select>
-  <select class="fsel" id="fSt" onchange="applyFilters()">
+  <select class="fsel" id="fSt" onchange="render()">
     <option value="">Status — todos</option>
     <option value="baixa">Baixa Cobertura</option>
     <option value="ideal">Cobertura Ideal</option>
     <option value="alta">Alta Cobertura</option>
   </select>
-  <button class="btn-cl" onclick="clearFilters()">✕ Limpar</button>
+  <button class="bcl" onclick="clearF()">✕ Limpar</button>
 </div>
 
 <div class="rinfo" id="info"></div>
-<div id="content"><div style="padding:40px 20px;color:#9CA3AF;">Carregando dados...</div></div>
+<div id="content"><div class="loading">Carregando dados...</div></div>
 
 <script>
-function getFab(cod) {
-  const c = (cod||'').trim();
-  if (c === '0000-028') return 'Terceiros';
-  if (c.startsWith('0072')) return 'Própria';
-  return 'Terceiros';
-}
-
+// ── Próxima sexta ────────────────────────────────────────────────────────────
 function proxSexta() {
-  const d = new Date();
-  const diff = (5 - d.getDay() + 7) % 7 || 7;
+  var d = new Date();
+  var diff = (5 - d.getDay() + 7) % 7;
+  if (diff === 0) diff = 7;
   d.setDate(d.getDate() + diff);
   return d.toLocaleDateString('pt-BR');
 }
-document.getElementById('sextaBadge').textContent = '📦 Próxima sexta: ' + proxSexta();
+var SEXTA = proxSexta();
+document.getElementById('sextaBadge').textContent = '📦 Próxima sexta: ' + SEXTA;
 
-function parseCSV(text) {
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) return [];
-  function splitLine(line) {
-    const cols=[]; let cur='', inQ=false;
-    for (let i=0; i<line.length; i++) {
-      const ch=line[i];
-      if (ch==='"'){
-        // handle escaped quotes ""
-        if (inQ && line[i+1]==='"'){cur+='"';i++;continue;}
-        inQ=!inQ;continue;
-      }
-      if (ch===','&&!inQ){cols.push(cur);cur='';continue;}
-      cur+=ch;
-    }
-    cols.push(cur);
-    return cols.map(c=>c.trim());
-  }
-  const headers = splitLine(lines[0]);
-  const iCod   = headers.findIndex(h=>/^cod/i.test(h));
-  const iDesc  = headers.findIndex(h=>/descri/i.test(h));
-  const iSP    = headers.findIndex(h=>h.trim().toUpperCase()==='SP');
-  const iEntSP = headers.findIndex(h=>/proxima.*entrada.*sp|entrada.*sp/i.test(h));
-  const iES    = headers.findIndex(h=>/vix|^es$|vix es/i.test(h.trim()));
-  const iEntES = headers.findIndex(h=>/proxima.*entrada.*es|entrada.*es/i.test(h));
-  const iTotal = headers.findIndex(h=>h.trim().toLowerCase()==='total');
-  const iFc    = headers.findIndex(h=>/forecast/i.test(h));
-
-  const rows=[];
-  for (let i=1; i<lines.length; i++) {
-    if (!lines[i].trim()) continue;
-    const c = splitLine(lines[i]);
-    const total = c[iTotal]||'';
-    if (total==='#N/A'||total==='') continue;
-    if (!c[iDesc]||!c[iDesc].trim()) continue;
-    rows.push({
-      cod:   c[iCod]||'',
-      desc:  (c[iDesc]||'').trim(),
-      sp:    c[iSP]||'',
-      entSP: c[iEntSP]||'',
-      es:    c[iES]||'',
-      entES: c[iEntES]||'',
-      total: c[iTotal]||'', fc: c[iFc]||''
-    });
-  }
-  return rows;
+// ── Fabricação por código ────────────────────────────────────────────────────
+function getFab(cod) {
+  var c = (cod || '').trim();
+  if (c === '0000-028') return 'Terceiros';
+  if (c.indexOf('0072') === 0) return 'Própria';
+  return 'Terceiros';
 }
 
-function toNum(v) {
-  if (!v||v==='#N/A'||v.trim()==='') return null;
-  const n = parseFloat(v.replace(/\./g,'').replace(',','.'));
-  return isNaN(n)?null:n;
+// ── Converte string BR para número ──────────────────────────────────────────
+function toN(v) {
+  if (!v || v === '#N/A' || v.trim() === '') return 0;
+  var n = parseFloat(v.replace(/\./g, '').replace(',', '.'));
+  return isNaN(n) ? 0 : n;
 }
 
-function calcCob(est,fc){
-  if (fc===null||fc<=0||est===null) return null;
-  return est/fc;
-}
-function getSt(m){
-  if (m===null) return 'alta';
-  if (m<2) return 'baixa';
-  if (m<=4) return 'ideal';
-  return 'alta';
-}
-function fmtCob(m){return m===null?'— m':m.toFixed(1).replace('.',',')+' m';}
-function fmtNum(n){return n===null?'—':Math.round(n).toLocaleString('pt-BR');}
-function slbl(s){return s==='baixa'?'Baixa Cob.':s==='ideal'?'Cob. Ideal':'Alta Cob.';}
-function hl(t,q){
-  if(!q)return t;
-  return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');
+// ── Estado global ────────────────────────────────────────────────────────────
+var DATA = [];
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function getSt(m) { return m === null ? 'alta' : m < 2 ? 'baixa' : m <= 4 ? 'ideal' : 'alta'; }
+function fmtN(n)  { return (n === null || n === undefined) ? '—' : Math.round(n).toLocaleString('pt-BR'); }
+function fmtC(m)  { return m === null ? '— m' : m.toFixed(1).replace('.', ',') + ' m'; }
+function slbl(s)  { return s === 'baixa' ? 'Baixa Cob.' : s === 'ideal' ? 'Cob. Ideal' : 'Alta Cob.'; }
+function hl(t, q) {
+  if (!q) return t;
+  try { return t.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>'); }
+  catch(e) { return t; }
 }
 
-let state=[];
+function render() {
+  var q      = document.getElementById('q').value.trim().toLowerCase();
+  var fFab   = document.getElementById('fFab').value;
+  var fSt    = document.getElementById('fSt').value;
+  var comEnt = document.getElementById('togEnt').checked;
 
-function applyFilters(){
-  const q      = document.getElementById('q').value.trim().toLowerCase();
-  const fFab   = document.getElementById('fFab').value;
-  const fSt    = document.getElementById('fSt').value;
-  const comEnt = document.getElementById('toggleEntrada').checked;
-
-  const hint = document.getElementById('toggleHint');
-  hint.textContent = comEnt
+  document.getElementById('togHint').textContent = comEnt
     ? '✅ Estoque atual + entradas previstas na sexta'
     : 'Exibindo apenas estoque atual';
-  hint.className = 'toggle-hint'+(comEnt?' on':'');
+  document.getElementById('togHint').className = 'tog-hint' + (comEnt ? ' on' : '');
 
-  const sOrder={baixa:0,ideal:1,alta:2};
+  var sOrd = { baixa: 0, ideal: 1, alta: 2 };
 
-  const rows = state.map(r=>{
-    const spEf  = (r.sp||0)  + (comEnt?(r.entSP||0):0);
-    const esEf  = (r.es||0)  + (comEnt?(r.entES||0):0);
-    const totEf = spEf + esEf;
-    const fc    = r.fc;
-    const m     = calcCob(totEf, fc);
-    const st    = getSt(m);
-    return {...r, spEf, esEf, totEf, mCalc:m, stCalc:st};
-  }).filter(r=>{
-    if (fFab && r.fab!==fFab) return false;
-    if (fSt  && r.stCalc!==fSt) return false;
-    if (q){
-      const hay=(r.cod+' '+r.desc+' '+r.fab).toLowerCase();
-      if (!hay.includes(q)) return false;
+  var rows = DATA.map(function(r) {
+    var spEf  = r.sp  + (comEnt ? r.entSP : 0);
+    var esEf  = r.es  + (comEnt ? r.entES : 0);
+    var totEf = spEf + esEf;
+    var m     = (r.fc && r.fc > 0) ? totEf / r.fc : null;
+    var st    = getSt(m);
+    return { cod: r.cod, fab: r.fab, desc: r.desc,
+             sp: r.sp, entSP: r.entSP, es: r.es, entES: r.entES,
+             tot: r.tot, fc: r.fc, spEf: spEf, esEf: esEf, totEf: totEf, m: m, st: st };
+  }).filter(function(r) {
+    if (fFab && r.fab !== fFab) return false;
+    if (fSt  && r.st  !== fSt)  return false;
+    if (q) {
+      var hay = (r.cod + ' ' + r.desc + ' ' + r.fab).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
     }
     return true;
   });
 
-  if (q){
-    rows.sort((a,b)=>{
-      const aT=(a.cod.toLowerCase().startsWith(q)||a.desc.toLowerCase().startsWith(q))?0:1;
-      const bT=(b.cod.toLowerCase().startsWith(q)||b.desc.toLowerCase().startsWith(q))?0:1;
-      if (aT!==bT) return aT-bT;
-      return sOrder[a.stCalc]-sOrder[b.stCalc]||(a.mCalc||999)-(b.mCalc||999);
-    });
-  } else {
-    rows.sort((a,b)=>sOrder[a.stCalc]-sOrder[b.stCalc]||(a.mCalc===null?1:b.mCalc===null?-1:a.mCalc-b.mCalc));
-  }
+  rows.sort(function(a, b) {
+    if (q) {
+      var aT = (a.cod.toLowerCase().indexOf(q) === 0 || a.desc.toLowerCase().indexOf(q) === 0) ? 0 : 1;
+      var bT = (b.cod.toLowerCase().indexOf(q) === 0 || b.desc.toLowerCase().indexOf(q) === 0) ? 0 : 1;
+      if (aT !== bT) return aT - bT;
+    }
+    var sd = sOrd[a.st] - sOrd[b.st];
+    if (sd !== 0) return sd;
+    var am = a.m === null ? 999 : a.m;
+    var bm = b.m === null ? 999 : b.m;
+    return am - bm;
+  });
 
-  document.getElementById('cnt-baixa').textContent = rows.filter(r=>r.stCalc==='baixa').length;
-  document.getElementById('cnt-ideal').textContent = rows.filter(r=>r.stCalc==='ideal').length;
-  document.getElementById('cnt-alta').textContent  = rows.filter(r=>r.stCalc==='alta').length;
+  document.getElementById('cnt-baixa').textContent = rows.filter(function(r){return r.st==='baixa';}).length;
+  document.getElementById('cnt-ideal').textContent = rows.filter(function(r){return r.st==='ideal';}).length;
+  document.getElementById('cnt-alta').textContent  = rows.filter(function(r){return r.st==='alta';}).length;
   document.getElementById('cnt-total').textContent = rows.length;
-  document.getElementById('cnt-sub').textContent   = rows.length<state.length?'de '+state.length+' SKUs':'monitorados';
+  document.getElementById('cnt-sub').textContent   = rows.length < DATA.length ? 'de ' + DATA.length + ' SKUs' : 'monitorados';
+  document.getElementById('info').innerHTML = rows.length < DATA.length
+    ? '<strong>' + rows.length + '</strong> de ' + DATA.length + ' SKUs exibidos' : '';
 
-  const info=document.getElementById('info');
-  info.innerHTML=rows.length<state.length
-    ?'<strong>'+rows.length+'</strong> de '+state.length+' SKUs exibidos':'';
-
-  if (rows.length===0){
-    document.getElementById('content').innerHTML='<div class="empty">Nenhum SKU encontrado para os filtros aplicados.</div>';
+  if (!rows.length) {
+    document.getElementById('content').innerHTML = '<div class="empty">Nenhum SKU encontrado.</div>';
     return;
   }
 
-  const sLbl={
-    baixa:'🔴 Baixa cobertura — menos de 2 meses',
-    ideal:'🟡 Cobertura ideal — 2 a 4 meses',
-    alta :'🟣 Alta cobertura — acima de 4 meses'
+  var sLbl = {
+    baixa: '🔴 Baixa cobertura — menos de 2 meses',
+    ideal: '🟡 Cobertura ideal — 2 a 4 meses',
+    alta:  '🟣 Alta cobertura — acima de 4 meses'
   };
-  const showSec=!q;
-  let lastSt=null;
+  var nCols   = comEnt ? 12 : 9;
+  var showSec = !q;
+  var lastSt  = null;
 
-  const sexta = proxSexta();
+  var thEntSP = comEnt ? '<th class="th-esp">Ent. SP<br><small style="font-weight:400">' + SEXTA + '</small></th>' : '';
+  var thEntES = comEnt ? '<th class="th-esg">Ent. ES<br><small style="font-weight:400">' + SEXTA + '</small></th>' : '';
+  var thTotC  = comEnt ? '<th class="th-totc">Total c/ Ent.</th>' : '';
 
-  // Cabeçalho dinâmico
-  const thEntSP = comEnt?`<th class="r esp">Ent. SP<br><span style="font-weight:400;font-size:9px;">${sexta}</span></th>`:'';
-  const thEntES = comEnt?`<th class="r esg">Ent. ES<br><span style="font-weight:400;font-size:9px;">${sexta}</span></th>`:'';
-  const thTotC  = comEnt?`<th class="r" style="background:#2D1A50;color:#C4B5FD;">Total c/ Ent.</th>`:'';
-  const nCols   = comEnt?12:9;
+  var html = '<div class="tw"><table><thead><tr>'
+    + '<th>Fab.</th><th>Código</th><th>Descrição (SKU)</th>'
+    + '<th class="r">Est. SP</th>' + thEntSP
+    + '<th class="r">Est. ES</th>' + thEntES
+    + '<th class="r">Total</th>' + thTotC
+    + '<th class="r">Forecast</th>'
+    + '<th class="r">Cob.</th><th>Status</th>'
+    + '</tr></thead><tbody>';
 
-  let html=`<div class="tw"><table><thead><tr>
-    <th>Fab.</th><th>Código</th><th>Descrição (SKU)</th>
-    <th class="r">Est. SP</th>
-    ${thEntSP}
-    <th class="r">Est. ES</th>
-    ${thEntES}
-    <th class="r">Total</th>
-    ${thTotC}
-    <th class="r">Forecast</th>
-    <th class="r">Cob.</th><th>Status</th>
-  </tr></thead><tbody>`;
-
-  rows.forEach(r=>{
-    if (showSec&&r.stCalc!==lastSt){
-      html+=`<tr class="sec"><td colspan="${nCols}">${sLbl[r.stCalc]}</td></tr>`;
-      lastSt=r.stCalc;
+  rows.forEach(function(r) {
+    if (showSec && r.st !== lastSt) {
+      html += '<tr class="sec"><td colspan="' + nCols + '">' + sLbl[r.st] + '</td></tr>';
+      lastSt = r.st;
     }
-    const fc    = r.fab==='Própria'?'fp':'ft';
-    const cCob  = r.stCalc==='baixa'?'ccb':r.stCalc==='ideal'?'cci':'cca';
-    const sBdg  = r.stCalc==='baixa'?'bsb':r.stCalc==='ideal'?'bsi':'bsa';
-    const idx   = state.indexOf(r);
-
-    const tdEntSP = comEnt?`<td class="r ent-sp">${r.entSP>0?fmtNum(r.entSP):'—'}</td>`:'';
-    const tdEntES = comEnt?`<td class="r ent-es">${r.entES>0?fmtNum(r.entES):'—'}</td>`:'';
-    const tdTotC  = comEnt?`<td class="r tot-c">${fmtNum(r.totEf)}</td>`:'';
-
-    html+=`<tr>
-      <td><span class="${fc}">${r.fab}</span></td>
-      <td class="cod">${hl(r.cod,q)}</td>
-      <td class="desc">${hl(r.desc,q)}</td>
-      <td class="r">${fmtNum(r.sp)}</td>
-      ${tdEntSP}
-      <td class="r">${fmtNum(r.es)}</td>
-      ${tdEntES}
-      <td class="r" style="font-weight:700">${fmtNum(r.sp+r.es)}</td>
-      ${tdTotC}
-      <td class="r">${fmtNum(r.fc)}</td>
-      <td class="r ${cCob}">${fmtCob(r.mCalc)}</td>
-      <td><span class="badge ${sBdg}">${slbl(r.stCalc)}</span></td>
-    </tr>`;
+    var fc      = r.fab === 'Própria' ? 'fp' : 'ft';
+    var cCob    = r.st === 'baixa' ? 'ccb' : r.st === 'ideal' ? 'cci' : 'cca';
+    var sBdg    = r.st === 'baixa' ? 'bsb' : r.st === 'ideal' ? 'bsi' : 'bsa';
+    var tdEntSP = comEnt ? '<td class="r ent-sp">' + (r.entSP > 0 ? fmtN(r.entSP) : '—') + '</td>' : '';
+    var tdEntES = comEnt ? '<td class="r ent-es">' + (r.entES > 0 ? fmtN(r.entES) : '—') + '</td>' : '';
+    var tdTotC  = comEnt ? '<td class="r tot-c">' + fmtN(r.totEf) + '</td>' : '';
+    html += '<tr>'
+      + '<td><span class="' + fc + '">' + r.fab + '</span></td>'
+      + '<td class="cod">' + hl(r.cod, q) + '</td>'
+      + '<td class="desc">' + hl(r.desc, q) + '</td>'
+      + '<td class="r">' + fmtN(r.sp) + '</td>' + tdEntSP
+      + '<td class="r">' + fmtN(r.es) + '</td>' + tdEntES
+      + '<td class="r" style="font-weight:700">' + fmtN(r.tot) + '</td>' + tdTotC
+      + '<td class="r">' + fmtN(r.fc) + '</td>'
+      + '<td class="r ' + cCob + '">' + fmtC(r.m) + '</td>'
+      + '<td><span class="badge ' + sBdg + '">' + slbl(r.st) + '</span></td>'
+      + '</tr>';
   });
 
-  html+='</tbody></table></div>';
-  document.getElementById('content').innerHTML=html;
+  html += '</tbody></table></div>';
+  document.getElementById('content').innerHTML = html;
 }
 
-function clearFilters(){
-  document.getElementById('q').value='';
-  document.getElementById('fFab').value='';
-  document.getElementById('fSt').value='';
-  applyFilters();
+function clearF() {
+  document.getElementById('q').value = '';
+  document.getElementById('fFab').value = '';
+  document.getElementById('fSt').value = '';
+  render();
 }
 
-fetch('estoque.csv?v='+Date.now(),{cache:'no-store'})
-  .then(r=>{
-    if (!r.ok) throw new Error('HTTP '+r.status);
-    return r.text();
-  })
-  .then(text=>{
-    const rows=parseCSV(text);
-    if (rows.length===0) throw new Error('CSV vazio ou sem dados reconhecíveis');
-    state=rows.map(r=>({
-      cod:   r.cod,
-      fab:   getFab(r.cod),
-      desc:  r.desc,
-      sp:    toNum(r.sp)||0,
-      entSP: toNum(r.entSP)||0,
-      es:    toNum(r.es)||0,
-      entES: toNum(r.entES)||0,
-      fc:    toNum(r.fc),
-    }));
-    document.getElementById('last-updated').textContent=
-      'Atualizado em '+new Date().toLocaleString('pt-BR');
-    applyFilters();
-  })
-  .catch(err=>{
-    document.getElementById('content').innerHTML=`
-      <div class="error-box">
-        <strong>Não foi possível carregar o arquivo de dados.</strong><br><br>
-        Verifique se <code>estoque.csv</code> está na mesma pasta que <code>index.html</code> no repositório.<br><br>
-        Se estiver abrindo localmente, o Chrome bloqueia leitura de arquivos locais. Acesse pelo link público do GitHub Pages.<br><br>
-        <em>Erro: ${err.message}</em>
-      </div>`;
-  });
+// ── Carregar CSV com PapaParse ───────────────────────────────────────────────
+Papa.parse('estoque.csv', {
+  download: true,
+  header: true,
+  skipEmptyLines: true,
+  complete: function(results) {
+    if (!results.data || results.data.length === 0) {
+      document.getElementById('content').innerHTML =
+        '<div class="error-box"><strong>CSV vazio ou sem dados.</strong><br>Verifique o arquivo estoque.csv no repositório.</div>';
+      return;
+    }
+
+    DATA = [];
+    results.data.forEach(function(r) {
+      var total = (r['Total'] || '').trim();
+      if (!total || total === '#N/A') return;
+      var desc = (r['Descrição'] || '').trim();
+      if (!desc) return;
+      var cod = (r['Codigo'] || '').trim();
+      DATA.push({
+        cod:   cod,
+        fab:   getFab(cod),
+        desc:  desc,
+        sp:    toN(r['SP']),
+        entSP: toN(r['Proxima Entrada em SP']),
+        es:    toN(r['VIX ES']),
+        entES: toN(r['Proxima Entrada em ES']),
+        tot:   toN(total),
+        fc:    toN(r['ForeCast Farma']) || null
+      });
+    });
+
+    document.getElementById('last-updated').textContent =
+      'Atualizado em ' + new Date().toLocaleString('pt-BR');
+
+    render();
+  },
+  error: function(err) {
+    document.getElementById('content').innerHTML =
+      '<div class="error-box"><strong>Não foi possível carregar o arquivo.</strong><br><br>'
+      + 'Verifique se <code>estoque.csv</code> está na mesma pasta que <code>index.html</code> no repositório.<br><br>'
+      + 'Se estiver abrindo localmente, acesse pelo link público do GitHub Pages.<br><br>'
+      + '<em>Erro: ' + err.message + '</em></div>';
+  }
+});
 </script>
 </body>
 </html>
